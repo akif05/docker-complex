@@ -345,6 +345,7 @@ docker exec -it container_id sh
 ## Multiple docker container start at same time and allow
 ## inter container connectivity
 docker build -t akif05/visits docker run -p 8081:8081 
+#
 
 ## Files and structure
 akifyusein$ pwd
