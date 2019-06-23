@@ -480,4 +480,55 @@ server
 # container can be reached by name specified in service section
 
 # Create new folder under complex
-mkdir nginx
+mkdir nginx; cd nginx
+
+# Create files
+tee Dockerfile.dev <<EOF
+FROM nginx
+
+# Overwrite the default.conf with the localfile
+COPY ./default.conf /etc/nginx/conf.d/default.conf
+EOF
+#####
+tee default.conf <<EOF
+upstream client {
+  server client:3000;
+}
+
+upstream api {
+  server api:5000;
+}
+
+server {
+  listen 80;
+
+  location / {
+    proxy_pass http://client;
+  }
+
+  location /sockjs-node {
+    proxy_pass http://client;
+    proxy_http_version 1.1;
+    proxy_set_header Upgrade $http_upgrade;
+    proxy_set_header Connection "Upgrade";
+  }
+
+  # if receive request to /api rewrite the url choping of /api part
+  # remove /api from the url before passing to backend
+  # 'break' means do not apply any rewrite rules after this rewrite
+  location /api {
+    rewrite /api/(.*) /$1 break;
+    proxy_pass http://api;
+  }
+}
+EOF
+#####
+
+# Create git repo and push local repo to github
+cd complex/
+git init
+git add .
+git commit -m 'Working nginx postgres redis react'
+curl -u 'akif05' https://api.github.com/user/repos -d '{"name":"docker-complex"}'
+git remote add origin https://github.com/akif05/docker-complex.git
+git push -u origin master
