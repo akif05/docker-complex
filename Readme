@@ -532,3 +532,23 @@ git commit -m 'Working nginx postgres redis react'
 curl -u 'akif05' https://api.github.com/user/repos -d '{"name":"docker-complex"}'
 git remote add origin https://github.com/akif05/docker-complex.git
 git push -u origin master
+
+
+# Single Container setup
+# Flow
+Push code to github
+Travis automatically pulls repo
+Travis builds an image, test code
+Travis pushes code to AWS EB
+EB builds image, deploys it
+
+# Multi continer setup
+# Flow
+Push code to github
+Travis automatically pulls repo
+Travis builds a test image, tests code
+Travis builds pod images
+Travis pushes built prod images to Docker Hub
+Travis pushes project to AWS EB
+EB pulls images from Docker Hub and deploys
+
