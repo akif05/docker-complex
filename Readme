@@ -553,3 +553,148 @@ Travis pushes built prod images to Docker Hub
 Travis pushes project to AWS EB
 EB pulls images from Docker Hub and deploys
 
+To automate building docker container in AWS
+Create a file named: Dockerrun.aws.json
+This json file will tel Elastic Beenstack where to pull images,
+what resource to alocate to each container,
+how to set up some port mapping
+Dockerrun.aws.json === docker-compose.yml
+in Dockerrun.aws.json instead of 'service' we define container
+Dockerrun file pulls image from docker hub (no build required)
+Elastic Beanstalk does not know how to run container
+in back is used Amazon Elastic Container Services(ECS)
+Dockerrun can be customize from ECS ( check documentation for ECS)§
+
+In AWS site!
+amazon ecs task definition 
+Task definition
+Container Deofinition
+tee Dockerrun.aws.json <<EOF
+{
+  "AWSEBDockerrunVersion": 2,
+  "containerDefinitions": [
+    {
+      "name": "client",
+      "image": "akif05/multi-client",
+      "hostname": "client",
+      "essential": false
+
+    },
+
+    {
+      "name": "server",
+      "image": "akif05/multi-server",
+      "hostname": "api",
+      "essential": false
+    },
+    {
+      "name": "worker",
+      "image": "akif05/multi-worker",
+      "hostname": "worker",
+      "essential": false
+    },
+    {
+      "name": "nginx",
+      "image": "akif05/multi-nginx",
+      "hostname": "nginx",
+      "essential": true,
+      "portMappings": [
+        {
+          "hostPort": 80,
+          "containerPort": 80
+        }
+      ],
+      "links": ["client", "server"]
+    
+      }
+  ]
+}
+EOF
+
+# Validate json file, brows for json validator
+# Wen we create an Elastic Bean instant AWS will
+# create default Virtual Private Cloud(VPC) per region
+# vpc is used to implement networking and different sec rules
+# and different way to connect different services
+# created in VPC
+# in AWS search for vpc and launch VPC dashboard
+# Choose Your VPCs to see multiple VPC
+# to allow trafic between services inside VPC
+# we need to create Security Group's(Firewall rules)
+## Aoutmaticaly folowing security Groups are created
+## Allow any incoming traffic on Port 80 from any Ip
+## Allow traffic on Port 3010 from IP 172.0.40.2 
+
+# Create new sec group
+## Allow any traffic from any other AWS service that ha this sec group
+## attach the sec group to EG Instance, RDS(Postgres) and EC(redis)
+# Create RDS (search in AWS dashboard for rds) and chooce create db
+# check 'Only enable options eligable for RDS Free Usage Tier'
+# set 'Master username' get them from our container 
+Db instance identifier: multi-docker-postgres
+Master Username: postgres
+Master password: postgrespassword
+
+# for subnet group and Vpc select default(instance will belong 
+# to default VPC
+# Publicl Accessibility: No
+# VPC security groups: Create new sec group
+Database name: fibvalues
+
+# we can setup Backup
+## click on create database
+
+# Create ElastiCache  ( for redis server )
+# name: multi-docker-redis
+# Node type: chach.t2.micro
+# Number of replicas: None
+# Subnet group: Create nuew
+Name: redis-group
+VPC ID: slect default vpc
+subnets: check all available
+## click on Create
+
+## Wire all instance with security group
+# Create Security Group
+# search for VPC
+# in left choose 'Security Group'
+
+Create Security Group
+    Name tag: multi-docker
+    Group name: multi-docker
+    Descritpion: Traffic for service in multi-docker app
+    VPC: Default
+
+# Create rule insed Sec group
+ Inbound Rules
+    edit
+    Type: Custom TCP Rule
+    Protucol: TCP
+    Port Range: 5432-6379
+    source: sg-0bjq4tq  //the sec group we created in previous step
+
+
+# Go to all instances (EB, RDS, EC) and apply the sec group
+
+Services 
+ElastiCache
+    Redis
+    sleect and click modify
+    
+RDS
+    Instances
+    mutli-docker-postgres
+    # Scrol down to find Details
+    # on top right find Modify
+    # 
+EB
+    Configuration
+    # in instances
+    Modfiy
+    ES2 Security groups
+    # check 'multi-docker'
+    Apply
+    Comfirm
+    
+
+
