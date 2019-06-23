@@ -3,10 +3,8 @@ services:
   - docker
 
 before_install:
-  - echo "BEFORE INSTALL START"
-  - gem install bundler
-  - echo "BEFORE INSTALL END"
   - docker build -t akif05/react-test -f ./client/Dockerfile.dev ./client
+  - gem install bundler
   
 script:
   - docker run akif05/react-test npm test -- --coverage
