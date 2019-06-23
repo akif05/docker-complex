@@ -1,0 +1,483 @@
+Docker run -it reds
+Insulated program with own 
+Docer cli reach out to docker hub and download docker image
+Docker image is of is a single file containing all dependencies and packages needed to run very specific program (example redis)
+This is a single file stored on local computer.
+Using this image to create container.
+Container is instance of an image.(runs a program).
+Container is running program.
+Container is a program with own insulated hardware resources.
+
+Install docer for mac
+Inside this package is docker client
+Docker CLI helps to interact with docker server
+Docker server is creating containers.
+
+
+# install docker on mac
+# sign in docker hub and install docker
+# download docker for mac
+# Start docker and login with docker id and pass
+# run: docker version
+docker version
+docker login
+# username: akif05
+# Pass: F........3x9
+docker run hello-world
+
+What a container is:
+Os running
+Chrom sends system cals to kernel 
+Kernel is intermediate program between software and hardware
+Kernel is accessing cpu, memory and hd
+
+Os can be used creating namespaces
+(Segmenting hardware)
+
+Control group can be used to limit the amount of (cpu, men, bandit..) per software
+
+Container is set of processes  that have grouping of resources 
+Specifically assigned to it. !!!!!!!
+
+Image is file system snapshot
+Image will have startup commands as well
+
+# Creagting and Running a Container from an Image
+docker                  run     <image_name>    command
+1.Ref to Docker client  
+2.Try to create and run a container
+3. Name of image to use for this container
+4. Default command override
+
+
+
+docker run busybox echo hi there
+docker run busybox ls
+
+Create busybox image
+Create FS snapshot
+Execute Startup commands
+(if provided OVERRIDE the default commands)
+
+list all runnig containers in docker
+docker ps
+
+docker run busybox ping google.com
+
+# Check running container on docker
+docker ps
+
+# list all containres created on the docker
+docker ps --all
+
+## Life sicle of the contaner
+# docker run command actualy executes two different commands
+docker create hello-world
+docker start container_id
+Creating container
+Creates FS snapshot of the image
+(Alocates resources for the container)
+
+Starting container
+(Executing startup command)
+
+docker create hello-world
+# create docker and output gives container id
+
+docker start container_id
+
+# docker start -a container_id
+# options '-a' sais 'giv me any output of this container)
+
+
+## docker ps --all
+This command shows exit status of the container
+Any container can be started from its id
+
+# list all docker container run on this docker
+docker ps --all
+
+# copy container id to start it with
+docker start container_id
+
+docker sart -a 7356b688253c
+# When starting container from it's id 
+# Container will start with the default command that
+# was started ( we can't override the this )
+
+## Remove stoped container
+# this will delete cache as well
+docker system prune
+
+akifyusein$ docker create busybox echo hi there
+e809c8e31862b0b79a14794accbe3c4efbf8ec04e8f212dd4f37a80a83bee622
+akifyusein$ docker start -a e809c8e31862b0b79a14794accbe3c4efbf8ec04e8f212dd4f37a80a83bee622
+
+# instead starting container by id with '-a' options we can use 
+# docker logs to get emited output of the docker container
+docker logs e809c8e31862b0b79a14794accbe3c4efbf8ec04e8f212dd4f37a80a83bee622
+
+docker create busybox ping dir.bg
+docker start 40f648e7eefeced8b26c6e3b86cac9ebb3e63009291ec20268973077ee7f4fc4
+docker logs 40f648e7eefeced8b26c6e3b86cac9ebb3e63009291ec20268973077ee7f4fc4
+
+docker stop docker_id 
+docker kill docker_id
+
+## Start redis server
+docker run redis
+# On diferent terminal get the container id
+docker ps
+
+# Folowing is executing redis-cli inside the redis container
+# created wen we started redis server
+# -it allows us to tipe input directly inside the container
+# Withot '-it' we can not tipe any input to the container
+docker exec -it docker_id redis-cli
+
+###
+akifyusein$ redis-cli
+-bash: redis-cli: command not found
+akifyusein$ docker ps
+CONTAINER ID        IMAGE               COMMAND                  CREATED             STATUS              PORTS               NAMES
+7a1841cbdcc8        redis               "docker-entrypoint.s…"   7 seconds ago       Up 6 seconds        6379/tcp            sad_curie
+akifyusein$ docker exec -it 7a1841cbdcc8 redis-cli
+127.0.0.1:6379> set myvalue 5
+OK
+127.0.0.1:6379> get myvalue
+"5"
+127.0.0.1:6379>
+
+
+###
+
+
+## Every container is running inside virtual machine that is running linx!!!
+'-it' flag is two different flags '-i and -t'
+-i flag means "Anythin tiped on the terminal send as standart input to the container
+-t flag means "All thext shows in nicely format to output"
+## check bellow using only -i flag
+
+akifyusein$ docker exec -i 7a1841cbdcc8 redis-cli
+set myvalue 5
+OK
+get myvalue
+5
+##
+
+
+# Get shell access to container instance
+akifyusein$ docker ps
+CONTAINER ID        IMAGE               COMMAND                  CREATED             STATUS              PORTS               NAMES
+7a1841cbdcc8        redis               "docker-entrypoint.s…"   13 minutes ago      Up 13 minutes       6379/tcp            sad_curie
+akifyusein$ docker exec -it 7a1841cbdcc8 sh
+# ls
+# cd /
+# ls
+bin   data  etc   lib	 media	opt   root  sbin  sys  usr
+boot  dev   home  lib64  mnt	proc  run   srv   tmp  var
+
+## sh in end of the docker exec .... will give us shell access to the container
+# bash can be used as well
+docker exec -it 7a1841cbdcc8 bash
+
+## you can run container as well: docker run -it busybox sh
+
+cat | tee Dockerfile <<EOF
+# Building docker image
+Create docker file
+mkdir rdis-image
+cd redis-image
+
+# Use an existing docker image as base
+FROM alpine
+
+
+# Download and install a dependency
+RUN apk add --update redis
+
+#Tell the image what to do when it starts
+#as a container
+CMD ["redis-server"]
+EOF
+
+docker build .
+
+dockre run docker_image
+## Bellow is a life cicle of the creation of the container
+akifyusein$ cat Dockerfile
+# Use an existin docker image as base
+FROM alpine
+
+
+# Download and install a dependency
+RUN apk add --update redis
+RUN apk add --update gcc
+
+#Tell the image what to do when it starts
+#as a container
+CMD ["redis-server"]
+akifyusein$ docker build .
+Sending build context to Docker daemon  2.048kB
+Step 1/4 : FROM alpine
+---> 055936d39205
+Step 2/4 : RUN apk add --update redis
+---> Using cache
+---> 27523083d541
+Step 3/4 : RUN apk add --update gcc
+---> Using cache
+---> 665e620651da
+Step 4/4 : CMD ["redis-server"]
+---> Using cache
+---> 76354f57f9eb
+Successfully built 76354f57f9eb
+akifyusein$ docker run 76354f57f9eb
+1:C 08 Jun 10:51:51.709 # oO0OoO0OoO0Oo Redis is starting oO0OoO0OoO0Oo
+1:C 08 Jun 10:51:51.709 # Redis version=4.0.12, bits=64, commit=1be97168, modified=0, pid=1, just started
+1:C 08 Jun 10:51:51.709 # Warning: no config file specified, using the default config. In order to specify a config file use redis-server /path/to/redis.conf
+1:M 08 Jun 10:51:51.710 * Running mode=standalone, port=6379.
+1:M 08 Jun 10:51:51.710 # WARNING: The TCP backlog setting of 511 cannot be enforced because /proc/sys/net/core/somaxconn is set to the lower value of 128.
+1:M 08 Jun 10:51:51.710 # Server initialized
+1:M 08 Jun 10:51:51.710 # WARNING you have Transparent Huge Pages (THP) support enabled in your kernel. This will create latency and memory usage issues with Redis. To fix this issue run the command 'echo never > /sys/kernel/mm/transparent_hugepage/enabled' as root, and add it to your /etc/rc.local in order to retain the setting after a reboot. Redis must be restarted after THP is disabled.
+1:M 08 Jun 10:51:51.710 * Ready to accept connections
+^C1:signal-handler (1559991116) Received SIGINT scheduling shutdown...
+1:M 08 Jun 10:51:56.507 # User requested shutdown...
+1:M 08 Jun 10:51:56.507 * Saving the final RDB snapshot before exiting.
+1:M 08 Jun 10:51:56.510 * DB saved on disk
+1:M 08 Jun 10:51:56.510 # Redis is now ready to exit, bye bye...
+
+####################################################################3
+
+## Tag the docker container
+your_docker_id/your_image:latest Dockerfiledirectory (. meance current)
+docker run -t stephengrider/redis:lates .
+docker run -t akif/redis:lates .
+
+## Create manualy container and get access to the shell
+docker run -it alpine sh
+
+# Install neccessary packages (dependecies)
+apk add --update redis
+apk add --update gcc
+
+# On second terminal
+docker ps #To get the container id
+
+# Set default command for the container
+docker commit -c 'CMD ["redis-server"]' docker_id
+
+# The output is a new image id  we customized
+docker run customized_image_id
+
+
+#### Create nodjs web application
+akifyusein$ tree
+.
+├── Dockerfile
+├── index.js
+└── package.json
+
+0 directories, 3 files
+akifyusein$ for i in $(ls ./);do echo $i; cat $i; echo "#####"; done;
+tee Dockerfile << EOF
+#Specify a base image
+
+FROM node:alpine
+
+## Add instruction to allow cocker to access package.json file
+## Copy will copy the file in temporary created file system from image
+## berfore running 'npm install'
+COPY ./ ./
+
+#Install dependencies
+RUN npm install
+RUN npm install express
+#Defailt command
+
+CMD ["npm", "start"]
+EOF
+
+
+tee index.js <<EOF
+const express = require('express');
+
+const app = express();
+
+app.get('/', (req, res) => {
+res.send('Hi there');
+});
+
+app.listen(8080, () => {
+console.log('Listening on port 8080');
+});
+EOF
+
+
+tee package.json <<EOF
+{
+"dependecies": {
+"express": "*"
+},
+"scripts": {
+"start": "node index.js"
+}
+}
+EOF
+
+docker build -t akif05/simpleweb .
+docker run akif05/simpleweb
+docker run -p 8080:8080 akif05/simpleweb
+# Port maping is not created on Dockerfile
+# Port maping is crearted on runtime
+# docker run -p 8080:8080 akif05/simpleweb
+# Docker Container can reach outside world by default
+# To allow traffic to container we need to do port mapping expliscitely 
+
+## Generate lisgt of files with tee 
+for i in $(ls ./);do echo "tee $i <<EOF"; cat $i; echo "EOF"; echo "#####"; done;
+
+# On running container run another command (sh in our case)
+
+docker exec -it container_id sh
+
+
+## docker compose is cli to connect multiple docker containers
+## Multiple docker container start at same time and allow
+## inter container connectivity
+docker build -t akif05/visits docker run -p 8081:8081 
+
+## Files and structure
+akifyusein$ pwd
+/Users/akifyusein/Docker/visits
+akifyusein$ tree
+.
+├── Dockerfile
+├── docker-compose.yml
+├── index.js
+└── package.json
+
+0 directories, 4 files
+akifyusein$ for i in $(ls ./);do echo "tee $i <<EOF"; cat $i; echo "EOF"; echo "#####"; done;
+tee Dockerfile <<EOF
+#Specify a base image
+FROM node:alpine
+
+# Create directory to copy the files
+# if not files will be coppyed to root dir '/'
+WORKDIR '/app'
+
+## Add instruction to allow cocker to access package.json file
+## Copy will copy the file in temporary created file system from image
+## berfore running 'npm install'
+COPY ./package.json ./
+RUN npm install
+RUN npm install express
+COPY . .
+
+CMD ["npm", "start"]
+EOF
+#####
+tee docker-compose.yml <<EOF
+version: "3"
+services:
+  redis-server:
+    image: 'redis'
+
+  node-app:
+    build: .
+    ports:
+      - "4001:8081"
+EOF
+#####
+tee index.js <<EOF
+const express = require('express');
+const redis = require('redis');
+
+const app = express();
+const client = redis.createClient({
+    host: 'redis-server',
+    port: 6379
+ });
+client.set('visits', 0);
+
+app.get('/', (req, res) => {
+  client.get('visits', (err, visits) => {
+    res.send('Number of visits is ' + visits);
+    client.set('visits', parseInt(visits) + 1);
+  });
+});
+
+app.listen(8081, () => {
+  console.log('Listening on port 8081');
+});
+EOF
+#####
+tee package.json <<EOF
+{
+  "dependencies": {
+    "express": "*",
+    "redis": "2.8.0"
+  },
+  "scripts": {
+    "start": "node index.js"
+  }
+}
+EOF
+#####
+
+
+## to build multiple containers!
+docker-compose up 
+docker-compose up --build
+
+# Launch in background
+docker-compose up -d
+
+# Stop containers
+docker-compose down
+
+
+## Restart crashed container
+# edit index.js to mack node crashes
+app.get('/', (req, res) => {
+
+
+# create react app
+cd Docker/complex/
+create-react-app client
+
+# command will generate client folder 
+# Inside src folder
+# html 5 push state routing
+
+
+## Compose
+postgres
+    What Image to use?
+redis
+    What Image to use?
+server
+    Specify build
+    Specify volumes
+    Specifyu env variables
+## check experss and react server
+
+# nginx in front will be used to route traffic to
+# express or to react server
+# desission will be tacken base on /api in fornt of the request
+# if requeset is to /api/something traffic will be send
+# to express server, if not to  React server
+# for this purpose we need to create default.conf in nginx directory
+
+# Tell nginx that there is an 'upstream' server at client:3000
+# Tell nginx that there is an 'upstream' server at server:5000
+# Liten on port 80
+# If anyone comes to '/' send them to client upstream
+# If anyone comes to '/api' send them to server upstream
+# client and server are defined in docker-compose.yml as services!
+# for nginx this acts as url
+# In docker-compose.yml SERFVICE NAME are used as domain name!
+# container can be reached by name specified in service section
+
+# Create new folder under complex
+mkdir nginx
