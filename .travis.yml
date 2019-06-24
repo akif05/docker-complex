@@ -23,3 +23,16 @@ after_success:
   - docker push akif05/multi-nginx
   - docker push akif05/multi-server
   - docker push akif05/multi-worker
+
+deploy:
+  provider: elasticbeanstalk
+  region: us-west-1 (from dashboard in aws)
+  app: mutl-docker
+  env: MultiDocker-env
+  bucket_name: (services, s3, find bucket, copy_bucket_name)
+  bucket_path: docker-multi
+  on:
+    branch: master
+  access_key_id: $AWS_ACCESS_KEY
+  secret_access_key:
+    secure: $AWS_SECRET_KEY

@@ -696,5 +696,115 @@ EB
     Apply
     Comfirm
     
+# Use postgres 
+akifyusein$ pwd
+/Users/akifyusein/Docker/complex
+akifyusein$ docker-compose up --build
+akifyusein$ docker exec -it e21a809c9c66 sh
 
+# psql -U postgres -W
+Password:
 
+postgres=# \l
+                                 List of databases
+   Name    |  Owner   | Encoding |  Collate   |   Ctype    |   Access privileges
+-----------+----------+----------+------------+------------+-----------------------
+ postgres  | postgres | UTF8     | en_US.utf8 | en_US.utf8 |
+ template0 | postgres | UTF8     | en_US.utf8 | en_US.utf8 | =c/postgres          +
+           |          |          |            |            | postgres=CTc/postgres
+ template1 | postgres | UTF8     | en_US.utf8 | en_US.utf8 | =c/postgres          +
+           |          |          |            |            | postgres=CTc/postgres
+(3 rows)
+
+postgres=# \c postgres
+Password for user postgres:
+You are now connected to database "postgres" as user "postgres".
+
+postgres=# \dt *.*
+                        List of relations
+       Schema       |          Name           | Type  |  Owner
+--------------------+-------------------------+-------+----------
+ information_schema | sql_features            | table | postgres
+ information_schema | sql_implementation_info | table | postgres
+............
+ public             | values                  | table | postgres
+(70 rows)
+
+postgres=# \dt public.*
+         List of relations
+ Schema |  Name  | Type  |  Owner
+--------+--------+-------+----------
+ public | values | table | postgres
+(1 row)
+postgres=# \dt public.values
+         List of relations
+ Schema |  Name  | Type  |  Owner
+--------+--------+-------+----------
+ public | values | table | postgres
+(1 row)
+postgres=# select * from values;
+ number
+--------
+(0 rows)
+postgres=# select * from values;
+ number
+--------
+      3
+(1 row)
+
+# Add evironment variable for ES
+Open Elastic Beanstalk
+Configuration
+    software
+        Modify software
+#I bootom of the page find Evironment variables
+# Open severices ElastiCache in new tab to copy env var from here to ES env var
+    open redis
+    primary end point
+
+Paste value from ElastiCache for ES env value
+    name            value
+REDIS_HOST  redis.r9nbg.0001.usw1.cache.amazonaws.com
+REDIS_PORT  6379
+PGUSER      postgres
+PGPASSWORD  postgrespassword
+
+# Folowing value get from AWS RDS instances Connect, Endpoint
+PGHOST      multi-docker-postgres.caszine...... 
+PGDATABASE  fibvaluase
+PGPORT      5432
+
+# Thise name check very carefully for speling
+
+# Add section in .travic.yml to tell ES to pull and 
+# deply the images 
+# send to ES the Dockerrun.aws.json 
+# Generate Access and Secret key id 
+# Go to AWS search for ime
+Set user detauls
+username: multi-docker-deployer
+Access type: Programmatic access
+    Next
+    search fro beenstalck
+    Check all 
+    Next
+    Create user
+
+Opne Travis-ci
+Open multi-docker - options - settings - add more env var
+AWS_ACCESS_KEY: paste key genrated in AWS
+AWS_SECRET_KEY: paste key genrated in AWS in previous step
+
+# Add deploy section in .travis.yml
+deploy:
+  provider: elasticbeanstalk
+  region: us-west-1 (from dashboard in aws)
+  app: mutl-docker
+  env: MultiDocker-env
+  bucket_name: (services, s3, find bucket, copy_bucket_name)
+  bucket_path: docker-multi
+  on: 
+    branch: master
+  access_key_id: $AWS_ACCESS_KEY
+  secret_access_key: 
+    secure: $AWS_SECRET_KEY
