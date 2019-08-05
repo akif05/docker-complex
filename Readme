@@ -924,3 +924,93 @@ Click More Options, and select Settings
 Scroll to Environment Variables
 Add AWS_ACCESS_KEY and set to your AWS access key
 Add AWS_SECRET_KEY and set to your AWS secret key
+
+#Kubernetes
+Kubernetes is a system for running many different
+containers over multiple different machines
+
+# Why use Kubernetes
+When need to run many different containers 
+whit different images
+
+# In development environment use 'minikube'
+# Minikube is used only on local computer
+
+# For production use: Amazon Elastic Container
+Service for Kubernetes(EKS)
+# Or Google Cloud Kubernetes Engine(GKE)
+# Or Do it yourself
+
+# Minikube will create kubernetes cluster on
+# the local machine, Use for managing the VM
+
+# Kubectl is used to managing containers in the node
+
+# Local Kubernetes Development
+Install Kubectl
+Install a VM driver(VirtualBox)
+Install minikube
+
+# Set up on Mac
+
+brew install kubectl
+brew cask install minikube
+minikube start
+# Last comand will create vm on VirtualBox
+# And setup the vm to act as minikube node
+
+minikube status
+kubectl cluster-info
+# how to map Docker knowledge to kubernetes
+docker-compose.yaml
+service:
+  nginx:
+    buil
+    ports
+  worker:
+    build
+    ports
+  client:
+    build
+    ports
+Each entry can optionally get docker-compose to
+build an image
+Each entry represents a container we want
+to create
+Each entry defines the networking
+requirements(ports)
+
+1. In Kuberentes we expect all images to be 
+comming all ready build - NO BUILD PROCESS
+2. Kubernetes uses multiple confi files
+one config file per object
+3. We have to manuallu set up all networking!
+
+# Goal is to run multi-client image on local
+# Kubernetes Cluster 
+
+Navigate to kubernets and brows for multi-client image
+mkdir simplek8s  - k8s , number 8 is representig 8 letters
+between k and s 'kubernetes'!
+
+mkdir simplek8s
+cd simplek8s
+code .
+
+tee client-pod.yaml <<EOF
+apiVersion: v1
+kind: Pod
+metadata:
+  name: client-Pod
+  labels:
+    component: web
+  spec:
+    containers:
+      - name: client
+        image: client
+        ports:
+          - containerPort: 300
+EOF
+
+# In Kubernetes world the smalest thing we can deploy is 'Pod'
+# Inside the Pod we can run one or more containrs

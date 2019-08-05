@@ -3,7 +3,7 @@ services:
   - docker
 
 before_install:
-  - docker build -t akif05/react-test -f ./client/Dockerfile.dev ./client
+  - docker build -t akif05/multi-client -f ./client/Dockerfile.dev ./client
   - gem install bundler
   
 script:
